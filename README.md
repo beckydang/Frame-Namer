@@ -3,10 +3,15 @@ a Figma plugin designed to automate sitemap numbering and rename multiple frames
 
 ## 🚀 Features
 ✅ Create sitemaps quickly by manually inputting or importing one from a text layer in Figma
+
 ✅ Generate a sitemap with hierarchical numbering and export it to Figma
+
 ✅ Custom numbering available in settings
+
 ✅ Add more levels to your sitemap as needed
+
 ✅ Select sitemap page names to apply names to Figma frames
+
 ✅ Improves workflow efficiency and reduces documentation effort
 
 ## 📥 Installation
