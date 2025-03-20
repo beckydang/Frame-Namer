@@ -1,0 +1,792 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <style>
+    /* Global Styles */
+    * { box-sizing: border-box; }
+    body {
+      font-family: "Helvetica Neue", Arial, sans-serif;
+      margin: 0;
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+      overflow: hidden;
+    }
+    
+    /* Tab Buttons */
+    .tabs {
+      display: flex;
+      width: 100%;
+      background: #f5f5f5;
+      border-bottom: 1px solid #ddd;
+    }
+    .tab-button {
+      flex: 1;
+      background: #f5f5f5;
+      border: none;
+      padding: 12px;
+      font-size: 14px;
+      cursor: pointer;
+      text-align: center;
+      transition: background 0.3s;
+      font-weight: bold;
+      border-bottom: 2px solid transparent;
+    }
+    .tab-button.active {
+      background: white;
+      border-bottom: 2px solid #007AFF;
+    }
+    .tab-button:hover { background: #e0e0e0; }
+    
+    /* Modern Button Styles */
+    .modern-btn {
+      background-color: #007AFF;
+      color: #fff;
+      border: none;
+      border-radius: 4px;
+      padding: 10px 16px;
+      font-size: 14px;
+      height: 40px;
+      cursor: pointer;
+      transition: background-color 0.2s ease;
+      display: inline-block;
+    }
+    .modern-btn:hover { background-color: #005BBB; }
+    .modern-btn:disabled {
+      background-color: #cccccc;
+      cursor: not-allowed;
+    }
+    
+    /* Outline button for secondary action */
+    .outline-btn {
+      background: transparent;
+      color: #007AFF;
+      border: 2px solid #007AFF;
+      border-radius: 4px;
+      transition: background-color 0.2s ease, color 0.2s ease;
+    }
+    .outline-btn:hover {
+      background: #007AFF;
+      color: white;
+    }
+    /* When disabled, cancel hover effects for outline buttons */
+    .outline-btn:disabled {
+      background-color: #cccccc;
+	color: #fff;
+      cursor: not-allowed;
+      border: 0px;
+    }
+
+    /* When disabled, cancel hover effects for outline buttons */
+    .outline-btn:disabled:hover {
+      background-color: #cccccc;
+	color: #fff;
+      cursor: not-allowed;
+      border: 0px;
+    }
+    
+    /* Tab Content */
+    .tab-content {
+      display: none;
+      padding: 15px;
+      flex: 1;
+      flex-direction: column;
+      min-height: 0;
+    }
+    .tab-content.active { display: flex; }
+    
+    /* Create Sitemap Tab */
+    #create-sitemap {
+      display: flex;
+      flex-direction: column;
+      flex: 1;
+    }
+    .instruction-text {
+      margin: 0;
+      padding: 5px 0;
+      font-size: 14px;
+      color: #333;
+    }
+    /* Textarea Wrapper with Bullet Mirror */
+    .textarea-wrapper {
+      position: relative;
+      margin-top: 10px;
+      border: 1px solid #ddd;
+      overflow: hidden;
+      flex: 1;
+      display: flex;
+    }
+    /* Bullet Mirror displays only bullet markers (light grey) based on indent level */
+    .bullet-mirror {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      color: #ccc;
+      font-size: 14px;
+      padding: 8px;
+      white-space: pre-wrap;
+      pointer-events: none;
+      z-index: 0;
+    }
+    /* Transparent Textarea over the mirror with reduced tab size and fills vertical space */
+    .textarea-wrapper textarea {
+      position: relative;
+      width: 100%;
+      height: 100%;
+      resize: horizontal;
+      padding: 8px;
+      font-size: 14px;
+      border: none;
+      outline: none;
+      white-space: pre-wrap;
+      background: transparent;
+      z-index: 1;
+      color: black;
+      tab-size: 1.5;
+      -moz-tab-size: 1.5;
+      -o-tab-size: 1.5;
+    }
+    .textarea-wrapper textarea,
+    .bullet-mirror {
+      line-height: 1.5em;
+    }
+    
+    /* Import Button Container */
+    #import-btn-container { margin-bottom: 10px; }
+    
+    /* Clear link styles */
+    .clear-link {
+      color: #007AFF;
+      text-decoration: none;
+      cursor: pointer;
+      font-size: 12px;
+    }
+    .clear-link:hover { text-decoration: underline; }
+    
+    /* Rename Frames Tab – header and list */
+    #rename-frames { }
+    #sitemap-list-wrapper {
+      flex: 1;
+      overflow-y: auto;
+      margin-top: 10px;
+      padding-bottom: 80px;
+    }
+    #name-list div {
+      padding: 5px;
+      cursor: pointer;
+      border-bottom: 1px solid #ddd;
+      text-align: left;
+    }
+    #name-list div:hover { background: #f0f0f0; }
+    
+    /* h4 in Rename Frames Tab */
+    h4 {
+      margin-block-start: 0.5em;
+      margin-block-end: 0.5em;
+    }
+    
+    /* Sticky Button Container for Rename Frames Tab */
+    .rename-container {
+      position: sticky;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      background: white;
+      padding: 10px;
+      border-top: 1px solid #ccc;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      min-height: 60px;
+    }
+    .button-row {
+      display: flex;
+      gap: 10px;
+    }
+    .button-row button {
+      flex: 1;
+    }
+    
+    /* Selection Info Text below buttons */
+    #selection-info {
+      font-size: 9px;
+      color: gray;
+      text-align: center;
+    }
+    
+    .numbering-setting-item {
+      width: auto; 
+      margin: 10px;
+    }
+  </style>
+</head>
+<body>
+  <!-- Tabs -->
+  <div class="tabs">
+    <button id="create-sitemap-button" class="tab-button active" onclick="switchTab('create-sitemap')">Step 1: Create Sitemap</button>
+    <button id="rename-frames-button" class="tab-button" onclick="switchTab('rename-frames')">Step 2: View Sitemap</button>
+  </div>
+  
+  <!-- Create Sitemap Tab -->
+  <div id="create-sitemap" class="tab-content active">
+    <p id="instruction-text" class="instruction-text">
+      Select a text layer on Figma to import a sitemap, or create it manually below.
+    </p>
+    <div id="import-btn-container">
+      <button class="modern-btn" onclick="importFromTextFrame()">Import sitemap</button>
+    </div>
+    <!-- Textarea Wrapper with Bullet Mirror -->
+    <div class="textarea-wrapper">
+      <div class="bullet-mirror" id="bullet-mirror"></div>
+      <textarea id="names" placeholder="Enter your sitemap here...">Home
+	About
+		Team
+		History
+	Contact</textarea>
+    </div>
+    <div class="clear-link">
+      <a onclick="clearTextArea()" style="float: right; margin-top: 10px;">Clear All</a>
+    </div>
+  </div>
+  
+  <!-- Rename Frames Tab (no bullet markers, with empty state support) -->
+  <div id="rename-frames" class="tab-content">
+    <!-- The header, instructions, and numbering-options will be hidden if no sitemap exists -->
+    <h4 id="sitemap-list-title">Generated Sitemap</h4>
+    <p class="instruction-text" id="rename-instructions">Select the page names from the sitemap below and then select the frames on your canvas you wish to rename, then click Rename selected. Frames will be renamed in order of selection.</p>
+    <div id="numbering-options" style="margin: 10px 0; font-size: 12px;">
+      <label>
+        <input type="checkbox" id="toggle-numbering" style="vertical-align: middle;" checked>
+        Enable numbering
+      </label>
+      <a id="settings-btn" class="clear-link" style="margin-left: 16px;">List settings</a>
+    </div>
+    <div id="sitemap-list-wrapper">
+      <div id="settings-panel" style="
+        position: fixed;
+        top: 0;
+        right: 0;
+        width: 300px;
+        height: 100%;
+        background: #fff;
+        border-left: 1px solid #ddd;
+        padding: 10px;
+        overflow-y: auto;
+        z-index: 100;
+        box-shadow: -2px 0 5px rgba(0,0,0,0.1);
+        display: none;
+      ">
+        <!-- Back button above header -->
+        <a id="back-settings" class="clear-link" style="display: block; margin-bottom: 24px;">← Back</a>
+        <h4>List settings</h4>
+        <p class="instruction-text">Select the numbering format you wish to apply to each level using the dropdown menus. Formatting is applied instantly.</p>
+        <div id="scrollable-container" style="padding-bottom: 80px;">
+          <div id="numbering-settings-list">
+            <div class="numbering-setting-item">
+              <span>L1:</span>
+              <select data-level="1">
+                <option value="nested" selected>Nested (1)</option>
+                <option value="simple">Simple (1)</option>
+                <option value="letter">Letter (A)</option>
+                <option value="roman">Roman (i)</option>
+              </select>
+            </div>
+            <div class="numbering-setting-item">
+              <span>L2:</span>
+              <select data-level="2">
+                <option value="nested" selected>Nested (1.1)</option>
+                <option value="simple">Simple (1)</option>
+                <option value="letter">Letter (A)</option>
+                <option value="roman">Roman (i)</option>
+              </select>
+            </div>
+            <div class="numbering-setting-item">
+              <span>L3:</span>
+              <select data-level="3">
+                <option value="nested" selected>Nested (1.1.1)</option>
+                <option value="simple">Simple (1)</option>
+                <option value="letter">Letter (A)</option>
+                <option value="roman">Roman (i)</option>
+              </select>
+            </div>
+            <div class="numbering-setting-item">
+              <span>L4:</span>
+              <select data-level="4">
+                <option value="nested" selected>Nested (1.1.1.1)</option>
+                <option value="simple">Simple (1)</option>
+                <option value="letter">Letter (A)</option>
+                <option value="roman">Roman (i)</option>
+              </select>
+            </div>
+            <div class="numbering-setting-item">
+              <span>L5:</span>
+              <select data-level="5">
+                <option value="nested" selected>Nested (1.1.1.1.1)</option>
+                <option value="simple">Simple (1)</option>
+                <option value="letter">Letter (A)</option>
+                <option value="roman">Roman (i)</option>
+              </select>
+            </div>
+            <div class="numbering-setting-item">
+              <span>L6:</span>
+              <select data-level="6">
+                <option value="letter" selected>Letter (A)</option>
+                <option value="nested">Nested (1.1.1.1.1)</option>
+                <option value="simple">Simple (1)</option>
+                <option value="roman">Roman (i)</option>
+              </select>
+            </div>
+            <div class="numbering-setting-item">
+              <span>L7:</span>
+              <select data-level="7">
+                <option value="roman" selected>Roman (i)</option>
+                <option value="nested">Nested (1.1.1.1.1)</option>
+                <option value="simple">Simple (1)</option>
+                <option value="letter">Letter (A)</option>
+              </select>
+            </div>
+            <div class="numbering-setting-item">
+              <span>L8:</span>
+              <select data-level="8">
+                <option value="nested" selected>Nested (1.1.1.1.1.A.i.1)</option>
+                <option value="simple">Simple (1)</option>
+                <option value="letter">Letter (A)</option>
+                <option value="roman">Roman (i)</option>
+              </select>
+            </div>
+            <div class="numbering-setting-item">
+              <span>L9:</span>
+              <select data-level="9">
+                <option value="nested" selected>Nested (1.1.1.1.1.A.i.1.1)</option>
+                <option value="simple">Simple (1)</option>
+                <option value="letter">Letter (A)</option>
+                <option value="roman">Roman (i)</option>
+              </select>
+            </div>
+            <div class="numbering-setting-item">
+              <span>L10:</span>
+              <select data-level="10">
+                <option value="nested" selected>Nested (1.1.1.1.1.A.i.1.1.1)</option>
+                <option value="simple">Simple (1)</option>
+                <option value="letter">Letter (A)</option>
+                <option value="roman">Roman (i)</option>
+              </select>
+            </div>
+          </div>
+          <div style="margin-top: 10px; text-align: left;">
+            <button id="add-level" style="font-size: 12px; padding: 4px 8px;">Add another</button>
+          </div>
+        </div>
+        <div id="bottom-controls" style="
+          position: sticky;
+          bottom: 0;
+          background: #fff;
+          padding-top: 10px;
+          border-top: 1px solid #ddd;
+          text-align: right;
+          margin-top: 10px;
+        ">
+          <a href="#" id="reset-numbering" class="clear-link">Reset to default</a>
+        </div>
+      </div>
+      
+      <div id="name-list"></div>
+    </div>
+  </div>
+  
+  <!-- Rename Options (Sticky Button Container) -->
+  <div id="rename-container" class="rename-container">
+    <div class="button-row">
+      <button id="export-btn" class="modern-btn outline-btn" onclick="exportSitemap()">Export to Figma</button>
+      <button id="rename-selected-btn" class="modern-btn" onclick="renameFrames()" disabled>Rename selected</button>
+    </div>
+    <div id="selection-info"></div>
+  </div>
+  
+  <script>
+    // Global Variables
+    let selectedNames = []; // Array to store selected list items; each: {order, text}
+    let frameCount = 0;     // Number of frames selected in Figma
+    const renameBtn = document.getElementById("rename-selected-btn");
+    const importBtnContainer = document.getElementById("import-btn-container");
+    const instructionText = document.getElementById("instruction-text");
+    const selectionInfo = document.getElementById("selection-info");
+    
+    // Global currentLevels variable for "Add another" functionality.
+    let currentLevels = 10;
+    
+    // Update Rename button state
+    function updateRenameButtonState() {
+      renameBtn.disabled = !(selectedNames.length > 0 && frameCount > 0);
+      updateSelectionInfo();
+    }
+    
+    // Update selection info text
+    function updateSelectionInfo() {
+      if (selectedNames.length === 0) {
+        selectionInfo.textContent = "";
+      } else {
+        const nameText = selectedNames.length === 1 ? "name" : "names";
+        const frameText = frameCount === 1 ? "frame" : "frames";
+        selectionInfo.textContent = selectedNames.length + " " + nameText + " selected, " + frameCount + " " + frameText + " selected";
+      }
+    }
+    
+    // Update import button visibility and instruction text
+    function updateImportButtonVisibility() {
+      const textarea = document.getElementById("names");
+      if (textarea.value.trim() === "") {
+        importBtnContainer.style.display = "block";
+        instructionText.textContent = "Select a text layer on Figma to import a sitemap, or create it manually below.";
+      } else {
+        importBtnContainer.style.display = "none";
+        instructionText.textContent = "Add or edit your sitemap below by creating new lines, or adding indents to create nesting structures.";
+      }
+      parent.postMessage({ pluginMessage: { type: "update-names", names: textarea.value.split("\n") } }, "*");
+    }
+    
+    // Check frame selection count
+    function checkFrameSelection() {
+      parent.postMessage({ pluginMessage: { type: "check-selection" } }, "*");
+    }
+    
+    // Update the bullet mirror in the Create Sitemap tab to display only bullets
+    function updateBulletMirror() {
+      const textarea = document.getElementById("names");
+      const mirror = document.getElementById("bullet-mirror");
+      if (!textarea || !mirror) return;
+      const lines = textarea.value.split("\n");
+      const mirrorLines = lines.map(line => {
+        const match = line.match(/^(\t*)/);
+        const indent = match ? match[0].length : 0;
+        return "• ".repeat(indent);
+      });
+      mirror.innerHTML = mirrorLines.join("<br>");
+    }
+    
+    // Sync bullet mirror scroll with textarea scroll using CSS transform
+    function syncBulletMirrorScroll() {
+      const textarea = document.getElementById("names");
+      const mirror = document.getElementById("bullet-mirror");
+      if (textarea && mirror) {
+        mirror.style.transform = "translateY(-" + textarea.scrollTop + "px)";
+      }
+    }
+    
+    window.onload = function () {
+      switchTab("create-sitemap");
+      const textarea = document.getElementById("names");
+      textarea.addEventListener("keydown", function(e) {
+        if (e.key === "Tab") {
+          e.preventDefault();
+          const start = this.selectionStart;
+          const end = this.selectionEnd;
+          this.value = this.value.substring(0, start) + "\t" + this.value.substring(end);
+          this.selectionStart = this.selectionEnd = start + 1;
+          updateImportButtonVisibility();
+          updateBulletMirror();
+        }
+      });
+      textarea.addEventListener("input", function() {
+        updateImportButtonVisibility();
+        updateBulletMirror();
+      });
+      textarea.addEventListener("scroll", syncBulletMirrorScroll);
+      updateImportButtonVisibility();
+      updateBulletMirror();
+    };
+    
+    // Switch between tabs
+    function switchTab(tab) {
+      document.querySelectorAll('.tab-content').forEach(content => {
+        content.style.display = "none";
+      });
+      document.querySelectorAll('.tab-button').forEach(button => {
+        button.classList.remove('active');
+      });
+      
+      const selectedTab = document.getElementById(tab);
+      selectedTab.style.display = "flex";
+      selectedTab.classList.add('active');
+      
+      if(tab === "create-sitemap") {
+        document.getElementById("create-sitemap-button").classList.add('active');
+      } else if(tab === "rename-frames") {
+        document.getElementById("rename-frames-button").classList.add('active');
+        updateHierarchicalList();
+        selectedNames = [];
+        updateRenameButtonState();
+        checkFrameSelection();
+      }
+      
+      const renameContainer = document.getElementById("rename-container");
+      renameContainer.style.display = (tab === "rename-frames") ? "flex" : "none";
+    }
+    
+    // Helpers for numbering
+    function numberToLetter(num) {
+      return String.fromCharCode(64 + Math.max(1, Math.floor(num)));
+    }
+    function numberToRoman(num) {
+      num = Math.max(1, Math.floor(num));
+      const romans = [
+        ["m", 1000], ["cm", 900], ["d", 500], ["cd", 400],
+        ["c", 100], ["xc", 90], ["l", 50], ["xl", 40],
+        ["x", 10], ["ix", 9], ["v", 5], ["iv", 4], ["i", 1]
+      ];
+      let result = "";
+      for (const [roman, value] of romans) {
+        while (num >= value) {
+          result += roman;
+          num -= value;
+        }
+      }
+      return result;
+    }
+    
+    function generateHierarchicalList(lines, options = { numbering: true, customFormats: {} }) {
+      const numberingFormats = { ...defaultNumberingFormats, ...options.customFormats };
+      const results = [];
+      const counters = [];
+      lines.forEach((line, index) => {
+        const match = line.match(/^(\t*)/);
+        const indent = match ? match[0].length : 0;
+        const level = indent + 1;
+        const trimmedLine = line.trim();
+        while (counters.length < level) { counters.push(0); }
+        counters.length = level;
+        counters[level - 1]++;
+        let prefix = "";
+        if (options.numbering) {
+          const parts = [];
+          for (let i = 1; i <= level; i++) {
+            const format = numberingFormats[i] || "nested";
+            const num = counters[i - 1];
+            if (format === "nested" || format === "simple") {
+              parts.push(num.toString());
+            } else if (format === "letter") {
+              parts.push(numberToLetter(num));
+            } else if (format === "roman") {
+              parts.push(numberToRoman(num));
+            } else {
+              parts.push(num.toString());
+            }
+          }
+          prefix = parts.join(".") + " ";
+        }
+        results.push({ order: index, text: prefix + trimmedLine });
+      });
+      return results;
+    }
+    
+    function updateHierarchicalList() {
+      const textarea = document.getElementById("names");
+      const lines = textarea.value.split("\n").filter(Boolean);
+      
+      const renameHeader = document.getElementById("sitemap-list-title");
+      const renameInstructions = document.getElementById("rename-instructions");
+      const numberingOptions = document.getElementById("numbering-options");
+      const nameListContainer = document.getElementById("name-list");
+      const exportBtn = document.getElementById("export-btn");
+      
+      // If no sitemap content, hide header/instructions/options and show empty state message, also disable export button.
+      if (lines.length === 0) {
+        renameHeader.style.display = "none";
+        if (renameInstructions) renameInstructions.style.display = "none";
+        numberingOptions.style.display = "none";
+        nameListContainer.innerHTML = "<p style='text-align: center; color: #999; font-size: 14px;'>Nothing's here at the moment. Come back when you've created or imported a sitemap in the other tab.</p>";
+        if (exportBtn) exportBtn.disabled = true;
+        return;
+      } else {
+        renameHeader.style.display = "block";
+        if (renameInstructions) renameInstructions.style.display = "block";
+        numberingOptions.style.display = "block";
+        if (exportBtn) exportBtn.disabled = false;
+      }
+      
+      const numberingEnabled = document.getElementById("toggle-numbering").checked;
+      const hierarchicalList = numberingEnabled ?
+        generateHierarchicalList(lines, { numbering: true, customFormats: customNumberingFormats }) :
+        lines.map((line, index) => ({ order: index, text: line.trim() }));
+      
+      nameListContainer.innerHTML = "";
+      hierarchicalList.forEach(item => {
+        const div = document.createElement("div");
+        div.textContent = item.text;
+        div.dataset.order = item.order;
+        div.onclick = () => {
+          const existingIndex = selectedNames.findIndex(si => si.order == item.order);
+          if (existingIndex > -1) {
+            selectedNames.splice(existingIndex, 1);
+            div.style.background = "";
+          } else {
+            selectedNames.push(item);
+            div.style.background = "#e0e0e0";
+          }
+          selectedNames.sort((a, b) => a.order - b.order);
+          updateRenameButtonState();
+        };
+        nameListContainer.appendChild(div);
+      });
+    }
+    
+    // Default numbering formats for levels 1 to 20
+    const defaultNumberingFormats = {
+      1: "nested",
+      2: "nested",
+      3: "nested",
+      4: "nested",
+      5: "nested",
+      6: "letter",
+      7: "roman",
+      8: "nested",
+      9: "nested",
+      10: "nested",
+      11: "nested",
+      12: "nested",
+      13: "letter",
+      14: "roman",
+      15: "nested",
+      16: "nested",
+      17: "nested",
+      18: "nested",
+      19: "nested",
+      20: "letter"
+    };
+    
+    let customNumberingFormats = { ...defaultNumberingFormats };
+    
+    function clearTextArea() {
+      document.getElementById("names").value = "";
+      updateImportButtonVisibility();
+      updateBulletMirror();
+    }
+    
+    function importFromTextFrame() {
+      parent.postMessage({ pluginMessage: { type: "import-text-frame" } }, "*");
+    }
+    
+    function exportSitemap() {
+      const textarea = document.getElementById("names");
+      const lines = textarea.value.split("\n").filter(Boolean);
+      const numberingEnabled = document.getElementById("toggle-numbering").checked;
+      let hierarchicalList;
+      if (numberingEnabled) {
+        hierarchicalList = generateHierarchicalList(lines, { numbering: true, customFormats: customNumberingFormats });
+      } else {
+        hierarchicalList = lines.map((line, index) => ({ order: index, text: line.trim() }));
+      }
+      const formattedNames = hierarchicalList.map(item => item.text).join("\n");
+      parent.postMessage({ pluginMessage: { type: "export-sitemap", content: formattedNames } }, "*");
+    }
+    
+    function renameFrames() {
+      if (selectedNames.length === 0 || frameCount === 0) {
+        alert("Please select one or more list items and ensure a frame is selected.");
+        return;
+      }
+      selectedNames.sort((a, b) => a.order - b.order);
+      const namesToApply = selectedNames.map(item => item.text);
+      parent.postMessage({ pluginMessage: { type: "rename-frames", selectedNames: namesToApply } }, "*");
+    }
+    
+    window.onmessage = (event) => {
+      const msg = event.data.pluginMessage;
+      if (msg.type === "load-names") {
+        const { names } = msg;
+        document.getElementById("names").value = names.join("\n");
+        updateHierarchicalList();
+        updateImportButtonVisibility();
+        updateBulletMirror();
+      }
+      if (msg.type === "selection-status") {
+        frameCount = msg.frameCount;
+        updateRenameButtonState();
+      }
+    };
+    
+    // Toggle settings panel
+    document.getElementById("settings-btn").addEventListener("click", () => {
+      document.getElementById("settings-panel").style.display = "block";
+    });
+    
+    // Back button hides the settings panel
+    document.getElementById("back-settings").addEventListener("click", () => {
+      document.getElementById("settings-panel").style.display = "none";
+    });
+    
+    // Update custom numbering formats when a dropdown changes
+    document.querySelectorAll("#numbering-settings-list select").forEach(select => {
+      select.addEventListener("change", (e) => {
+        const level = e.target.getAttribute("data-level");
+        customNumberingFormats[level] = e.target.value;
+        updateHierarchicalList();
+      });
+    });
+    
+    // Reset numbering formats
+    document.getElementById("reset-numbering").addEventListener("click", (e) => {
+      e.preventDefault();
+      customNumberingFormats = { ...defaultNumberingFormats };
+      document.querySelectorAll("#numbering-settings-list select").forEach(select => {
+        const level = select.getAttribute("data-level");
+        select.value = defaultNumberingFormats[level];
+      });
+      updateHierarchicalList();
+    });
+    
+    // Toggle numbering settings when checkbox changes
+    document.getElementById("toggle-numbering").addEventListener("change", function() {
+      const numberingEnabled = this.checked;
+      document.getElementById("settings-btn").style.display = numberingEnabled ? "inline-block" : "none";
+      updateHierarchicalList();
+    });
+    
+    // "Add another" handler
+    document.getElementById("add-level").addEventListener("click", function() {
+      currentLevels++;
+      const newItem = createNumberingSettingItem(currentLevels);
+      document.getElementById("numbering-settings-list").appendChild(newItem);
+    });
+    
+    function createNumberingSettingItem(level) {
+      const container = document.createElement('div');
+      container.className = 'numbering-setting-item';
+      const label = document.createElement('span');
+      label.textContent = 'L' + level + ':';
+      container.appendChild(label);
+      const select = document.createElement('select');
+      select.setAttribute('data-level', level);
+      const options = [
+        { value: 'nested', text: 'Nested' },
+        { value: 'simple', text: 'Simple (1)' },
+        { value: 'letter', text: 'Letter (A)' },
+        { value: 'roman', text: 'Roman (i)' }
+      ];
+      const defaultFormat = getDefaultFormat(level);
+      options.forEach(optData => {
+        const option = document.createElement('option');
+        option.value = optData.value;
+        option.textContent = (optData.value === 'nested') ? optData.text + ' (e.g., 1.1...)' : optData.text;
+        if (optData.value === defaultFormat) {
+          option.selected = true;
+        }
+        select.appendChild(option);
+      });
+      container.appendChild(select);
+      select.addEventListener("change", (e) => {
+        const lvl = e.target.getAttribute("data-level");
+        customNumberingFormats[lvl] = e.target.value;
+        updateHierarchicalList();
+      });
+      return container;
+    }
+    
+    function getDefaultFormat(level) {
+      return defaultNumberingFormats[level] || "nested";
+    }
+  </script>
+</body>
+</html>
