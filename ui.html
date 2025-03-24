@@ -166,7 +166,6 @@
     .clear-link:hover { text-decoration: underline; }
     
     /* Rename Frames Tab – header and list */
-    #rename-frames { }
     #sitemap-list-wrapper {
       flex: 1;
       overflow-y: auto;
@@ -220,6 +219,73 @@
       width: auto; 
       margin: 10px;
     }
+
+    .clear-link {
+      float: right; 
+      margin-top: 10px;
+    }
+
+    #numbering-options {
+      margin: 10px 0; 
+      font-size: 12px;
+    }
+
+    #toggle-numbering {
+      vertical-align: middle;
+    }
+
+    a #settings-btn {
+      margin-left: 16px;
+    }
+
+    #sitemap-list-wrapper #settings-panel {
+      position: fixed;
+        top: 0;
+        right: 0;
+        width: 300px;
+        height: 100%;
+        background: #fff;
+        border-left: 1px solid #ddd;
+        padding: 10px;
+        overflow-y: auto;
+        z-index: 100;
+        box-shadow: -2px 0 5px rgba(0,0,0,0.1);
+        display: none;
+    }
+
+    .a #back-settings {
+      display: block; 
+      margin-bottom: 24px;
+    }
+
+    #sitemap-list-wrapper #settings-panel #scrollable-container {
+      padding-bottom: 80px;
+    }
+
+    #bottom-controls {
+      position: sticky;
+      bottom: 30px;
+      background: #fff;
+      padding-top: 10px;
+      border-top: 1px solid #ddd;
+      text-align: right;
+      margin-top: 10px;
+    }
+
+    #add-another {
+      margin-top: 16px; 
+      text-align: left;
+    }
+
+    #add-level {
+      font-size: 12px; 
+      padding: 4px 8px;
+      background-color:#fff;
+      color:#005BBB;
+      border: 1px solid;
+    }
+
+
   </style>
 </head>
 <body>
@@ -247,7 +313,7 @@
 	Contact</textarea>
     </div>
     <div class="clear-link">
-      <a onclick="clearTextArea()" style="float: right; margin-top: 10px;">Clear All</a>
+      <a onclick="clearTextArea()">Clear All</a>
     </div>
   </div>
   
@@ -256,33 +322,20 @@
     <!-- The header, instructions, and numbering-options will be hidden if no sitemap exists -->
     <h4 id="sitemap-list-title">Generated Sitemap</h4>
     <p class="instruction-text" id="rename-instructions">Select the page names from the sitemap below and then select the frames on your canvas you wish to rename, then click Rename selected. Frames will be renamed in order of selection.</p>
-    <div id="numbering-options" style="margin: 10px 0; font-size: 12px;">
+    <div id="numbering-options">
       <label>
-        <input type="checkbox" id="toggle-numbering" style="vertical-align: middle;" checked>
+        <input type="checkbox" id="toggle-numbering" checked>
         Enable numbering
       </label>
-      <a id="settings-btn" class="clear-link" style="margin-left: 16px;">List settings</a>
+      <a id="settings-btn" class="clear-link">List settings</a>
     </div>
     <div id="sitemap-list-wrapper">
-      <div id="settings-panel" style="
-        position: fixed;
-        top: 0;
-        right: 0;
-        width: 300px;
-        height: 100%;
-        background: #fff;
-        border-left: 1px solid #ddd;
-        padding: 10px;
-        overflow-y: auto;
-        z-index: 100;
-        box-shadow: -2px 0 5px rgba(0,0,0,0.1);
-        display: none;
-      ">
+      <div id="settings-panel">
         <!-- Back button above header -->
-        <a id="back-settings" class="clear-link" style="display: block; margin-bottom: 24px;">← Back</a>
+        <a id="back-settings" class="clear-link">← Back</a>
         <h4>List settings</h4>
         <p class="instruction-text">Select the numbering format you wish to apply to each level using the dropdown menus. Formatting is applied instantly.</p>
-        <div id="scrollable-container" style="padding-bottom: 80px;">
+        <div id="scrollable-container">
           <div id="numbering-settings-list">
             <div class="numbering-setting-item">
               <span>L1:</span>
@@ -375,19 +428,11 @@
               </select>
             </div>
           </div>
-          <div style="margin-top: 10px; text-align: left;">
-            <button id="add-level" style="font-size: 12px; padding: 4px 8px;">Add another</button>
+          <div id="add-another">
+            <button id="add-level">Add another</button>
           </div>
         </div>
-        <div id="bottom-controls" style="
-          position: sticky;
-          bottom: 0;
-          background: #fff;
-          padding-top: 10px;
-          border-top: 1px solid #ddd;
-          text-align: right;
-          margin-top: 10px;
-        ">
+        <div id="bottom-controls">
           <a href="#" id="reset-numbering" class="clear-link">Reset to default</a>
         </div>
       </div>
